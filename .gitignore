@@ -342,3 +342,7 @@ ASALocalRun/
 healthchecksdb
 
 MaskFiles/
+
+# 官方发布产物与增量更新补丁（与源码构建无关，且含闭源启动器/更新通道）
+最新正式版.zip
+patches/
