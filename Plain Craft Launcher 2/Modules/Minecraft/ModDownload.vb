@@ -1178,21 +1178,27 @@ Public Module ModDownload
         Dim Urls As New List(Of (Url As String, Timeout As Integer))
         Dim McimUrl As String = DlSourceModGet(Url)
         If McimUrl <> Url Then
-            Select Case Settings.Get(Of Integer)("ToolDownloadMod")
-                Case 0
-                    Urls.Add((McimUrl, 10))
-                    Urls.Add((McimUrl, 10))
-                    Urls.Add((Url, 30))
-                Case 1
-                    Urls.Add((Url, If(Url.Contains("modrinth"), 20, 10))) '至少 20s，要不然 Modrinth 返回不过来
-                    Urls.Add((McimUrl, 10))
-                    Urls.Add((Url, 30))
-                    Urls.Add((McimUrl, 30))
-                Case Else
-                    Urls.Add((Url, If(Url.Contains("modrinth"), 20, 10)))
-                    Urls.Add((Url, 30))
-                    Urls.Add((McimUrl, 30))
-            End Select
+            If Url.Contains("curseforge") Then
+                'CurseForge：仅使用镜像源，不再尝试官方 API
+                Urls.Add((McimUrl, 10))
+                Urls.Add((McimUrl, 30))
+            Else
+                Select Case Settings.Get(Of Integer)("ToolDownloadMod")
+                    Case 0
+                        Urls.Add((McimUrl, 10))
+                        Urls.Add((McimUrl, 10))
+                        Urls.Add((Url, 30))
+                    Case 1
+                        Urls.Add((Url, If(Url.Contains("modrinth"), 20, 10)))
+                        Urls.Add((McimUrl, 10))
+                        Urls.Add((Url, 30))
+                        Urls.Add((McimUrl, 30))
+                    Case Else
+                        Urls.Add((Url, If(Url.Contains("modrinth"), 20, 10)))
+                        Urls.Add((Url, 30))
+                        Urls.Add((McimUrl, 30))
+                End Select
+            End If
         Else
             Urls.Add((Url, If(Url.Contains("modrinth"), 20, 10)))
             Urls.Add((Url, 30))
