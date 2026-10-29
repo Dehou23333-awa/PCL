@@ -455,51 +455,6 @@ Public Class PageLinkMain
         Return HostName
     End Function
     ''' <summary>
-    ''' 检查本地联机模块是否可用。
-    ''' 也接受压缩包里的原始文件名，便于直接复制别人分享的文件。
-    ''' </summary>
-    Private Shared Function EnsureLocalModule() As Boolean
-        DirectoryUtils.Create(PathEasyTier)
-        RenameModuleFile(PathEasyTier & "easytier-core.exe", PathEasyTier & "联机模块.exe")
-        RenameModuleFile(PathEasyTier & "easytier-cli.exe", PathEasyTier & "联机模块 CLI.exe")
-        If Not FileUtils.Exists(PathEasyTier & "wintun.dll") Then
-            Logger.Warn("联机模块缺少 wintun.dll，可能需要重新获取完整的压缩包")
-        End If
-        Return FileUtils.Exists(PathEasyTier & "联机模块.exe") AndAlso FileUtils.Exists(PathEasyTier & "联机模块 CLI.exe")
-    End Function
-    Private Shared Sub RenameModuleFile(Source As String, Target As String)
-        If Not FileUtils.Exists(Source) Then Return
-        Try
-            '两个文件都存在时，以刚放入的那个为准
-            If FileUtils.Exists(Target) Then
-                If IO.File.GetLastWriteTimeUtc(Source) <= IO.File.GetLastWriteTimeUtc(Target) Then Return
-                FileUtils.Delete(Target)
-            End If
-            FileUtils.Move(Source, Target)
-            Logger.Info($"已将 {IO.Path.GetFileName(Source)} 重命名为 {IO.Path.GetFileName(Target)}")
-        Catch ex As Exception
-            Logger.Warn(ex, $"重命名联机模块文件失败：{Source} → {Target}")
-        End Try
-    End Sub
-    ''' <summary>
-    ''' 向本地联机模块询问版本号。无法获取时返回 -1。
-    ''' </summary>
-    Private Shared Function GetLocalModuleVersion() As Integer
-        Dim CliPath As String = PathEasyTier & "联机模块 CLI.exe"
-        If Not FileUtils.Exists(CliPath) Then Return -1
-        Try
-            Dim Output As String = StartProcessAndGetOutput(CliPath, "--version", 10000)
-            Logger.Info($"联机模块报告的版本信息：{Output.Replace(vbCrLf, " ").Trim()}")
-            Dim Match = System.Text.RegularExpressions.Regex.Match(Output, "(\d+)\.(\d+)\.(\d+)")
-            If Match.Success Then
-                Return CInt(Val(Match.Groups(1).Value) * 10000 + Val(Match.Groups(2).Value) * 100 + Val(Match.Groups(3).Value))
-            End If
-        Catch ex As Exception
-            Logger.Warn(ex, "获取联机模块版本失败")
-        End Try
-        Return -1
-    End Function
-    ''' <summary>
     ''' 获取设置中填写的联机节点地址。
     ''' </summary>
     Private Shared Function GetSettingsPeers() As List(Of String)
@@ -572,28 +527,15 @@ Public Class PageLinkMain
                 Architecture = "arm64"
         End Select
         Logger.Info($"CPU 架构：{Architecture}")
-        '检查联机模块
+        '检查 EasyTier 版本
         UpdateLoadingPage("正在检查联机模块版本……", "检查联机模块版本")
-        ServerVersion = LinkModuleVersion
-        Dim LocalVersion As Integer = Settings.Get(Of Integer)("LinkEasyTierVersion")
-        Dim HasModule As Boolean = EnsureLocalModule()
-        If Not HasModule Then
-            LocalVersion = -1
+        If Not (FileUtils.Exists(PathEasyTier & "联机模块 CLI.exe") AndAlso FileUtils.Exists(PathEasyTier & "联机模块.exe") AndAlso
+                FileUtils.Exists(PathEasyTier & "Packet.dll")) Then
             Settings.Set("LinkEasyTierVersion", -1)
-        ElseIf LocalVersion <> ServerVersion Then
-            '手动放入的模块没有版本记录，直接向模块询问
-            Dim DetectedVersion As Integer = GetLocalModuleVersion()
-            If DetectedVersion >= 0 Then LocalVersion = DetectedVersion Else LocalVersion = ServerVersion
-            Settings.Set("LinkEasyTierVersion", LocalVersion)
-            Logger.Info($"检测到已存在的联机模块，识别出的版本：{LocalVersion}")
+            FileUtils.Delete(PathEasyTier & "EasyTier.zip") '没有安装好的模块时，残留的压缩包可能已损坏，直接重新下载
         End If
-        If Not HasModule AndAlso FileUtils.Exists(PathEasyTier & "EasyTier.zip") Then
-            '直接放入的压缩包也可以使用
-            Logger.Info("检测到已有的联机模块压缩包，将跳过下载")
-            LocalVersion = ServerVersion
-            Settings.Set("LinkEasyTierVersion", LocalVersion)
-        End If
-        If HasModule Then FileUtils.Delete(PathEasyTier & "EasyTier.zip") '模块已就绪，不再需要压缩包
+        Dim LocalVersion As Integer = Settings.Get(Of Integer)("LinkEasyTierVersion")
+        ServerVersion = LinkModuleVersion
         Dim RequiredFiles As New List(Of NetFile)
         Logger.Info($"EasyTier 本地版本：{LocalVersion}，需求版本：{ServerVersion}")
         If LocalVersion < ServerVersion Then
