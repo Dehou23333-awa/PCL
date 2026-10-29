@@ -436,6 +436,7 @@ Public Module ModUpdate
 
     ''' <summary>
     ''' 下载并准备更新包。就绪后会在程序退出时自动替换。
+    ''' <para/>下载会作为任务加入任务管理，可查看进度与取消。
     ''' </summary>
     ''' <param name="Silent">是否静默下载，即不询问是否立即重启。</param>
     ''' <param name="Info">已获取的更新信息。为空时会自动等待检查结果。</param>
@@ -454,14 +455,21 @@ Public Module ModUpdate
                     OpenWebsite(If(String.IsNullOrWhiteSpace(Info.PageUrl), $"https://github.com/{UpdateRepo}/releases", Info.PageUrl))
                     Return
                 End If
-                '下载更新包
+                '下载更新包（包成组合加载器，以便出现在任务管理中）
                 DirectoryUtils.Create(UpdateTempFolder)
                 Dim ZipPath As String = UpdateTempFolder & "PCL.zip"
                 FileUtils.Delete(ZipPath)
-                Hint($"正在下载更新包（{Info.AssetName}）……")
-                Dim Downloader As New LoaderDownload("下载更新包", New List(Of NetFile) From {New NetFile({Info.AssetUrl}, ZipPath)})
+                Dim DownloadTask As New LoaderDownload("下载更新包", New List(Of NetFile) From {New NetFile({Info.AssetUrl}, ZipPath)}) With {.ProgressWeight = 100}
+                Dim Downloader As New LoaderCombo(Of List(Of NetFile))($"下载 PCL 更新包（{Info.Tag}）", {DownloadTask})
+                Downloader.Start()
+                LoaderTaskbarAdd(Downloader)
+                FrmMain?.BtnExtraDownload.ShowRefresh()
                 Try
                     Downloader.WaitForExit()
+                Catch ex As OperationCanceledException
+                    FileUtils.Delete(ZipPath)
+                    Hint("已取消下载更新包", HintType.Blue)
+                    Return
                 Finally
                     Downloader.Cancel()
                 End Try
