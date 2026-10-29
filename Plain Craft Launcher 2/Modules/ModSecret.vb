@@ -140,19 +140,6 @@ Friend Module ModSecret
 
 #End Region
 
-#Region "联网配置"
-
-    ''' <summary>
-    ''' 联网获取的配置信息。
-    ''' 若获取失败或仍在获取中，可能为 Nothing。
-    ''' </summary>
-    Public ServerConfig As JObject
-
-    Public ServerLoader As New LoaderTask(Of Integer, Integer)("PCL 配置更新", Sub() Logger.Info("该版本中不包含更新通知功能……"), Priority:=ThreadPriority.BelowNormal) With
-        {.ReloadTimeout = 1000 * 60 * 60} '超时 1 小时
-
-#End Region
-
 #Region "赞助等级"
 
     Public ReadOnly Property CurrentRank As DonationRank

@@ -194,9 +194,9 @@ Public Class PageLinkMain
         If CodeVersion > INVITE_CODE_VERSION Then Return "你的 PCL 版本太老了，请在更新 PCL 之后再联机！"
         If CodeVersion < INVITE_CODE_VERSION Then Return "这是旧版 PCL 的邀请码，请让房主使用新版重新创建房间！"
         '校验节点
-        Dim Peers = ParsePeers(Code.Substring(21))
-        If Not Peers.Any() Then Return "邀请码中没有包含联机节点，请让房主重新复制一份"
-        Dim InvalidPeer = Peers.FirstOrDefault(Function(Address) Not ValidatePeer(Address))
+        Dim CodePeers = ParsePeers(Code.Substring(21))
+        If Not CodePeers.Any() Then Return "邀请码中没有包含联机节点，请让房主重新复制一份"
+        Dim InvalidPeer = CodePeers.FirstOrDefault(Function(Address) Not ValidatePeer(Address))
         If InvalidPeer IsNot Nothing Then Return $"邀请码中的节点地址有误（{InvalidPeer}），可能被聊天软件截断，请让房主重新复制一份"
         Return Nothing
     End Function
