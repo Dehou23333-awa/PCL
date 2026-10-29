@@ -10,274 +10,108 @@ Public Class FormMain
         Dim FeatureCount As Integer = 0, BugCount As Integer = 0
         Dim FeatureList As New List(Of KeyValuePair(Of Integer, String))
         '统计更新日志条目
-        If BuildType = BuildTypes.Release Then
-            If LastVersion < 421 Then 'Release 2.15.2.1
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：下载更新包时显示在任务管理中，可查看进度并取消"))
+        '5：          FEAT+
+        '4：     IMP+ FEAT*
+        '3：BUG+ IMP* FEAT-
+        '2：BUG* IMP-
+        '1：BUG-
+        If LastVersion < 421 Then 'Release 2.15.2.1
+            FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：下载更新包时显示在任务管理中，可查看进度并取消"))
+        End If
+        If LastVersion < 419 Then 'Release 2.15.2.0
+            FeatureList.Add(New KeyValuePair(Of Integer, String)(4, "新增：从 GitHub Releases 检查并下载启动器更新，重启后自动完成替换"))
+            FeatureList.Add(New KeyValuePair(Of Integer, String)(3, "优化：移除匿名遥测数据上报与启动器公告"))
+        End If
+        If LastVersion < 415 Then 'Release 2.15.0.0
+            FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：默认关闭自动更新，改为通过 GitHub Releases 发布新版本"))
+        End If
+        If LastVersion < 417 Then 'Release 2.15.1.0
+            FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：CurseForge 社区资源请求改为仅使用镜像源，减少连接等待"))
+            FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：关于页面补充原作者署名、赞助链接与源代码入口"))
+            FeatureList.Add(New KeyValuePair(Of Integer, String)(1, "优化：开源版说明不再提示 CurseForge API Key"))
+        End If
+        If LastVersion < 411 Then 'Release 2.14.0.0
+            FeatureList.Add(New KeyValuePair(Of Integer, String)(5, "新增：允许修改、添加、移除、更新已安装版本的 MC 版本以及各个组件，可从版本设置中进入"))
+            FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：启动游戏时允许按 Esc 取消"))
+            FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：允许复制主页的启动日志中的内容"))
+            FeatureCount += 19
+            BugCount += 26
+        End If
+        If LastVersion < 408 Then 'Release 2.13.1.1
+            FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：版本设置中，添加打开截图文件夹的快捷方式"))
+            FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：导出整合包时，可以勾选导出光影设置文件"))
+            FeatureCount += 23
+            BugCount += 28
+        End If
+        If LastVersion < 406 Then 'Release 2.13.0.1
+            FeatureList.Add(New KeyValuePair(Of Integer, String)(4, "新增：重做 Java 管理与相关设置，允许调整 Java 优先级、指定 Java 版本范围等"))
+            FeatureList.Add(New KeyValuePair(Of Integer, String)(3, "优化：导出整合包时允许自动导出版本文件夹中的 Java"))
+            FeatureList.Add(New KeyValuePair(Of Integer, String)(3, "优化：重做弹出提示的样式以及动画，以更符合现代 UI 审美"))
+            FeatureList.Add(New KeyValuePair(Of Integer, String)(1, "修复：可能无法安装 OptiFine 26.1.2"))
+            FeatureCount += 35
+            BugCount += 17
+        End If
+        If LastVersion < 404 Then 'Release 2.12.8.2
+            FeatureList.Add(New KeyValuePair(Of Integer, String)(1, "修复：Windows 7 无法正常联网"))
+            FeatureCount += 1
+            BugCount += 2
+        End If
+        If LastVersion < 402 Then 'Release 2.12.8.1
+            FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：升级框架到 .NET Framework 4.8"))
+            FeatureCount += 35
+            BugCount += 21
+        End If
+        If LastVersion < 398 Then 'Release 2.12.7.3
+            FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：下载游戏、整合包的稳定性"))
+            FeatureCount += 1
+            BugCount += 5
+        End If
+        If LastVersion < 391 Then 'Release 2.12.6.2
+            FeatureList.Add(New KeyValuePair(Of Integer, String)(1, "修复：会为部分 Forge / NeoForge 选择不支持的 Java"))
+            BugCount += 4
+        End If
+        If LastVersion < 389 Then 'Release 2.12.6.1
+            If LastVersion = 387 Then FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "修复：无法使用 Java 25+ 启动 Forge"))
+            FeatureCount += 4
+            BugCount += 3
+        End If
+        If LastVersion < 387 Then 'Release 2.12.6
+            FeatureList.Add(New KeyValuePair(Of Integer, String)(3, "优化：降低 Minecraft 的内存占用"))
+            FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "修复：Minecraft 使用 Java 25+ 时的一个性能问题"))
+            FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "修复：无法下载 NeoForge 26.1"))
+            FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "修复：部分关键词搜不到资源，特别是中文 Mod 搜索经常没有结果"))
+            FeatureList.Add(New KeyValuePair(Of Integer, String)(1, "修复：老版本 Windows 无法启动游戏"))
+            FeatureList.Add(New KeyValuePair(Of Integer, String)(1, "修复：连接 Mojang 的服务可能失败，提示错误码 421"))
+            FeatureList.Add(New KeyValuePair(Of Integer, String)(1, "修复：无法访问爱发电"))
+            FeatureCount += 24
+            BugCount += 19
+        End If
+        If LastVersion < 383 Then 'Release 2.12.3
+            FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "修复：部分关键词搜不到资源，特别是中文 Mod 搜索经常没有结果"))
+            FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "修复：下载可能完全卡住，或是下载进度反复回退"))
+            FeatureList.Add(New KeyValuePair(Of Integer, String)(1, "新增：内存管理设置，可以选择 G1GC、ZGC 或分代 ZGC"))
+            FeatureList.Add(New KeyValuePair(Of Integer, String)(1, "优化：来自 Modrinth 的文件下载速度"))
+            FeatureCount += 15
+            BugCount += 16
+        End If
+        If LastVersion < 381 Then 'Release 2.12.2
+            FeatureCount += 3
+            BugCount += 13
+        End If
+        If LastVersion < 379 Then 'Release 2.12.1
+            If LastVersion >= 376 Then
+                FeatureList.Add(New KeyValuePair(Of Integer, String)(5, "删除：暂时隐藏联机入口……不过只是暂时关闭，它还会回来的！"))
             End If
-            If LastVersion < 419 Then 'Release 2.15.2.0
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(4, "新增：从 GitHub Releases 检查并下载启动器更新，重启后自动完成替换"))
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(3, "优化：移除匿名遥测数据上报与启动器公告"))
-            End If
-            If LastVersion < 415 Then 'Release 2.15.0.0
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：默认关闭自动更新，改为通过 GitHub Releases 发布新版本"))
-            End If
-            If LastVersion < 417 Then 'Release 2.15.1.0
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：CurseForge 社区资源请求改为仅使用镜像源，减少连接等待"))
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：关于页面补充原作者署名、赞助链接与源代码入口"))
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(1, "优化：开源版说明不再提示 CurseForge API Key"))
-            End If
-            If LastVersion < 411 Then 'Release 2.14.0.0
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(5, "新增：允许修改、添加、移除、更新已安装版本的 MC 版本以及各个组件，可从版本设置中进入"))
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：启动游戏时允许按 Esc 取消"))
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：允许复制主页的启动日志中的内容"))
-                FeatureCount += 19
-                BugCount += 26
-            End If
-            If LastVersion < 408 Then 'Release 2.13.1.1
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：版本设置中，添加打开截图文件夹的快捷方式"))
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：导出整合包时，可以勾选导出光影设置文件"))
-                FeatureCount += 23
-                BugCount += 28
-            End If
-            If LastVersion < 406 Then 'Release 2.13.0.1
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(4, "新增：重做 Java 管理与相关设置，允许调整 Java 优先级、指定 Java 版本范围等"))
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(3, "优化：导出整合包时允许自动导出版本文件夹中的 Java"))
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(3, "优化：重做弹出提示的样式以及动画，以更符合现代 UI 审美"))
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(1, "修复：可能无法安装 OptiFine 26.1.2"))
-                FeatureCount += 35
-                BugCount += 17
-            End If
-            If LastVersion < 404 Then 'Release 2.12.8.2
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(1, "修复：Windows 7 无法正常联网"))
-                FeatureCount += 1
-                BugCount += 2
-            End If
-            If LastVersion < 402 Then 'Release 2.12.8.1
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：升级框架到 .NET Framework 4.8"))
-                FeatureCount += 35
-                BugCount += 21
-            End If
-            If LastVersion < 398 Then 'Release 2.12.7.3
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：下载游戏、整合包的稳定性"))
-                FeatureCount += 1
-                BugCount += 5
-            End If
-            If LastVersion < 391 Then 'Release 2.12.6.2
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(1, "修复：会为部分 Forge / NeoForge 选择不支持的 Java"))
-                BugCount += 4
-            End If
-            If LastVersion < 389 Then 'Release 2.12.6.1
-                If LastVersion = 387 Then FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "修复：无法使用 Java 25+ 启动 Forge"))
-                FeatureCount += 4
-                BugCount += 3
-            End If
-            If LastVersion < 387 Then 'Release 2.12.6
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(3, "优化：降低 Minecraft 的内存占用"))
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "修复：Minecraft 使用 Java 25+ 时的一个性能问题"))
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "修复：无法下载 NeoForge 26.1"))
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "修复：部分关键词搜不到资源，特别是中文 Mod 搜索经常没有结果"))
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(1, "修复：老版本 Windows 无法启动游戏"))
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(1, "修复：连接 Mojang 的服务可能失败，提示错误码 421"))
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(1, "修复：无法访问爱发电"))
-                FeatureCount += 24
-                BugCount += 19
-            End If
-            If LastVersion < 383 Then 'Release 2.12.3
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "修复：部分关键词搜不到资源，特别是中文 Mod 搜索经常没有结果"))
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "修复：下载可能完全卡住，或是下载进度反复回退"))
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(1, "新增：内存管理设置，可以选择 G1GC、ZGC 或分代 ZGC"))
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(1, "优化：来自 Modrinth 的文件下载速度"))
-                FeatureCount += 15
-                BugCount += 16
-            End If
-            If LastVersion < 381 Then 'Release 2.12.2
-                FeatureCount += 3
-                BugCount += 13
-            End If
-            If LastVersion < 379 Then 'Release 2.12.1
-                If LastVersion >= 376 Then
-                    FeatureList.Add(New KeyValuePair(Of Integer, String)(5, "删除：暂时隐藏联机入口……不过只是暂时关闭，它还会回来的！"))
-                End If
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(3, "新增：适配新的 Minecraft 版本号系统与 Unobfuscated 版本"))
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：巨幅优化各个下载页面和 Mod 管理页面的性能"))
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(1, "优化：更换披风时会显示当前使用的披风"))
-                FeatureCount += 33
-                BugCount += 29
-            End If
-            If LastVersion < 376 Then 'Release 2.11.2
-                'FeatureList.Add(New KeyValuePair(Of Integer, String)(5, "新增：联机功能！"))
-                FeatureCount += 32
-                BugCount += 21
-            End If
-        Else
-            '5：          FEAT+
-            '4：     IMP+ FEAT*
-            '3：BUG+ IMP* FEAT-
-            '2：BUG* IMP-
-            '1：BUG-
-            If LastVersion < 422 Then 'Snapshot 2.15.2.1
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：下载更新包时显示在任务管理中，可查看进度并取消"))
-            End If
-            If LastVersion < 420 Then 'Snapshot 2.15.2.0
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(4, "新增：从 GitHub Releases 检查并下载启动器更新，重启后自动完成替换"))
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(3, "优化：移除匿名遥测数据上报与启动器公告"))
-            End If
-            If LastVersion < 416 Then 'Snapshot 2.15.0.0
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：默认关闭自动更新，改为通过 GitHub Releases 发布新版本"))
-            End If
-            If LastVersion < 418 Then 'Snapshot 2.15.1.0
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：CurseForge 社区资源请求改为仅使用镜像源，减少连接等待"))
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：关于页面补充原作者署名、赞助链接与源代码入口"))
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(1, "优化：开源版说明不再提示 CurseForge API Key"))
-            End If
-            If LastVersion < 412 Then 'Snapshot 2.14.0.0
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(5, "新增：允许修改、添加、移除、更新已安装版本的 MC 版本以及各个组件，可从版本设置中进入"))
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：启动游戏时允许按 Esc 取消"))
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：允许复制主页的启动日志中的内容"))
-                FeatureCount += 19
-                BugCount += 26
-            End If
-            If LastVersion < 410 Then 'Snapshot 2.13.1.1
-                If LastVersion = 409 Then FeatureList.Add(New KeyValuePair(Of Integer, String)(1, "修复：更新 Mod 时可能更新成另一个 Mod 加载器的版本"))
-                FeatureCount += 2
-                BugCount += 6
-            End If
-            If LastVersion < 409 Then 'Snapshot 2.13.1.0
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：版本设置中，添加打开截图文件夹的快捷方式"))
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：导出整合包时，可以勾选导出光影设置文件"))
-                FeatureCount += 21
-                BugCount += 22
-            End If
-            If LastVersion < 407 Then 'Snapshot 2.13.0.1
-                If LastVersion = 405 Then
-                    FeatureList.Add(New KeyValuePair(Of Integer, String)(1, "修复：使用部分主页预设时崩溃"))
-                    FeatureList.Add(New KeyValuePair(Of Integer, String)(1, "修复：无法删除部分文件夹"))
-                    FeatureList.Add(New KeyValuePair(Of Integer, String)(1, "修复：版本设置中指定的 Java 无法被保存"))
-                    FeatureCount += 1
-                    BugCount += 3
-                End If
-                FeatureCount += 2
-            End If
-            If LastVersion < 405 Then 'Snapshot 2.13.0.0
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(4, "新增：重做 Java 管理与相关设置，允许调整 Java 优先级、指定 Java 版本范围等"))
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(3, "优化：导出整合包时允许自动导出版本文件夹中的 Java"))
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(3, "优化：重做弹出提示的样式以及动画，以更符合现代 UI 审美"))
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(1, "修复：可能无法安装 OptiFine 26.1.2"))
-                FeatureCount += 35
-                BugCount += 17
-            End If
-            If LastVersion < 403 Then 'Snapshot 2.12.8.2
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(1, "修复：Windows 7 无法正常联网"))
-                FeatureCount += 1
-                BugCount += 2
-            End If
-            If LastVersion < 401 Then 'Snapshot 2.12.8.1
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(1, "修复：可能无法更换披风"))
-                FeatureCount += 8
-                BugCount += 6
-            End If
-            If LastVersion < 399 Then 'Snapshot 2.12.8.0
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：升级框架到 .NET Framework 4.8"))
-                FeatureCount += 28
-                BugCount += 19
-            End If
-            If LastVersion < 397 Then 'Snapshot 2.12.7.3
-                If LastVersion >= 393 AndAlso LastVersion < 397 Then FeatureList.Add(New KeyValuePair(Of Integer, String)(1, "修复：无法使用自定义隐藏主题"))
-            End If
-            If LastVersion < 395 Then 'Snapshot 2.12.7.2
-                If LastVersion = 393 Then FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "修复：部分个性化功能失效"))
-            End If
-            If LastVersion < 393 Then 'Snapshot 2.12.7.1
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：允许永久关闭启动页面的快照版提示"))
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：下载游戏、整合包的稳定性"))
-                FeatureCount += 1
-                BugCount += 5
-            End If
-            If LastVersion < 390 Then 'Snapshot 2.12.6.2
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(1, "修复：会为部分 Forge / NeoForge 选择不支持的 Java"))
-                BugCount += 4
-            End If
-            If LastVersion < 388 Then 'Snapshot 2.12.6.1
-                If LastVersion = 386 Then FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "修复：无法使用 Java 25+ 启动 Forge"))
-                FeatureCount += 4
-                BugCount += 3
-            End If
-            If LastVersion < 386 Then 'Snapshot 2.12.6
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "修复：Minecraft 使用 Java 25+ 时的一个性能问题"))
-                If LastVersion = 384 OrElse LastVersion = 385 Then FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "修复：无法正常重命名游戏版本"))
-                If LastVersion = 385 Then FeatureList.Add(New KeyValuePair(Of Integer, String)(1, "修复：无法显示 Modrinth 整合包的版本列表"))
-                BugCount += 1
-            End If
-            If LastVersion < 385 Then 'Snapshot 2.12.5
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "修复：无法下载 NeoForge 26.1"))
-                If LastVersion = 384 Then
-                    FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "修复：下载可能失败，提示任务管理刷新线程出错"))
-                    FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "修复：无法保存选择的 Minecraft 文件夹"))
-                    FeatureList.Add(New KeyValuePair(Of Integer, String)(1, "修复：使用中文搜索 Mod 时，部分结果会忽略筛选条件"))
-                End If
-                FeatureCount += 3
-                BugCount += 6
-            End If
-            If LastVersion < 384 Then 'Snapshot 2.12.4
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(3, "优化：降低 Minecraft 的内存占用"))
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "修复：部分关键词搜不到资源，特别是中文 Mod 搜索经常没有结果"))
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(1, "修复：老版本 Windows 无法启动游戏"))
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(1, "修复：连接 Mojang 的服务可能失败，提示错误码 421"))
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(1, "修复：无法访问爱发电"))
-                FeatureCount += 21
-                BugCount += 14
-            End If
-            If LastVersion < 382 Then 'Snapshot 2.12.3
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "修复：下载可能完全卡住，或是下载进度反复回退"))
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(1, "新增：内存管理设置，可以选择 G1GC、ZGC 或分代 ZGC"))
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(1, "优化：来自 Modrinth 的文件下载速度"))
-                FeatureCount += 15
-                BugCount += 16
-            End If
-            If LastVersion < 380 Then 'Snapshot 2.12.2
-                FeatureCount += 3
-                BugCount += 13
-            End If
-            If LastVersion < 378 Then 'Snapshot 2.12.1
-                If LastVersion >= 377 Then
-                    FeatureList.Add(New KeyValuePair(Of Integer, String)(1, "修复：在版本列表中存在 OptiFine 时可能无法加载版本列表"))
-                    BugCount += 2
-                End If
-            End If
-            If LastVersion < 377 Then 'Snapshot 2.12.0
-                If LastVersion >= 373 Then
-                    FeatureList.Add(New KeyValuePair(Of Integer, String)(5, "删除：暂时隐藏联机入口……不过只是暂时关闭，它还会回来的！"))
-                End If
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(3, "新增：适配新的 Minecraft 版本号系统与 Unobfuscated 版本"))
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：巨幅优化各个下载页面和 Mod 管理页面的性能"))
-                FeatureList.Add(New KeyValuePair(Of Integer, String)(1, "优化：更换披风时会显示当前使用的披风"))
-                FeatureCount += 33
-                BugCount += 29
-            End If
-            If LastVersion < 375 Then 'Snapshot 2.11.2
-                'If LastVersion >= 373 Then
-                '    FeatureList.Add(New KeyValuePair(Of Integer, String)(3, "优化：对联机进行了各种各样的优化，以改善稳定性"))
-                '    FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：若有加入者的网络环境比房主更好，会提示可以让那位加入者担任房主"))
-                'End If
-                FeatureCount += 16
-                BugCount += 4
-            End If
-            If LastVersion < 374 Then 'Snapshot 2.11.1
-                'If LastVersion >= 373 Then
-                '    FeatureList.Add(New KeyValuePair(Of Integer, String)(3, "优化：使用离线登录也可以直接加入联机房间了"))
-                '    FeatureList.Add(New KeyValuePair(Of Integer, String)(3, "优化：会从所有共享节点中自动选择负载最低的进行中继连接"))
-                '    FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：若复制了邀请码，则可以直接快速加入房间"))
-                '    FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：关闭 PCL 时总是会提示是否退出联机，防止在关闭 PCL 时无意地关闭或退出了房间"))
-                '    FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "新增：允许自定义要连接的节点"))
-                'End If
-                FeatureCount += 9
-                BugCount += 7
-            End If
-            If LastVersion < 373 Then 'Snapshot 2.11.0
-                'FeatureList.Add(New KeyValuePair(Of Integer, String)(5, "新增：联机功能！"))
-                FeatureCount += 7
-                BugCount += 10
-            End If
+            FeatureList.Add(New KeyValuePair(Of Integer, String)(3, "新增：适配新的 Minecraft 版本号系统与 Unobfuscated 版本"))
+            FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：巨幅优化各个下载页面和 Mod 管理页面的性能"))
+            FeatureList.Add(New KeyValuePair(Of Integer, String)(1, "优化：更换披风时会显示当前使用的披风"))
+            FeatureCount += 33
+            BugCount += 29
+        End If
+        If LastVersion < 376 Then 'Release 2.11.2
+            'FeatureList.Add(New KeyValuePair(Of Integer, String)(5, "新增：联机功能！"))
+            FeatureCount += 32
+            BugCount += 21
         End If
         '整理更新日志文本
         Dim ContentList As New List(Of String)
