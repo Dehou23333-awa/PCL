@@ -36,7 +36,7 @@
                             <RowDefinition Height="28" />
                         </Grid.RowDefinitions>
                         <TextBlock VerticalAlignment="Center" HorizontalAlignment="Left" Text="节点地址" Margin="0,0,25,0" />
-                        <local:MyTextBox x:Name="TextCustomPeer" local:SettingService.Key="LinkCustomPeer" Grid.Column="1" MaxHeight="28"
+                        <local:MyTextBox x:Name="TextCustomPeer" local:SettingService.Key="LinkCustomPeer" Grid.Column="1" MaxHeight="28" HintText="tcp://1.2.3.4:11010"
                             ToolTip="联机需要一个自己与朋友都能连到的 EasyTier 节点，填在这里。&#xa;多台设备如果在同一个局域网内，直接在游戏里联机即可，不需要本功能。&#xa;&#xa;多个节点使用英文逗号分隔，例如：&#xa;tcp://1.2.3.4:11010,tcp://user:pass@5.6.7.8:11010&#xa;&#xa;节点需要自行搭建，不会自动下载或使用公共节点。" />
                     </Grid>
                     <TextBlock Margin="0,12,0,0" FontSize="13" LineHeight="19" TextWrapping="Wrap" Foreground="{StaticResource ColorBrushGray3}"

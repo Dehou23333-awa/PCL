@@ -75,6 +75,8 @@ Public Class PageLinkMain
                     ChangeState(LinkStates.Finished)
                 Case LoadState.Failed
                     ChangeState(LinkStates.Failed)
+                Case LoadState.Canceled
+                    ChangeState(LinkStates.Waiting) '在任务管理中取消后回到初始页面
             End Select
         End Sub
     End Sub
@@ -242,6 +244,8 @@ Public Class PageLinkMain
         FailCount = 0
         '加载器与进程状态
         LinkLoader.Start(IsForceRestart:=True)
+        LoaderTaskbarAdd(LinkLoader) '让联机模块的下载等步骤能在任务管理中查看与取消
+        FrmMain?.BtnExtraDownload.ShowRefresh()
         '页面切换会由 Loader 调用 MyPageRight 来触发
         'UI 更新
         UpdateProgressBar(0)
