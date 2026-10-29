@@ -11,6 +11,14 @@ Public Class FormMain
         Dim FeatureList As New List(Of KeyValuePair(Of Integer, String))
         '统计更新日志条目
         If BuildType = BuildTypes.Release Then
+            If LastVersion < 415 Then 'Release 2.15.0.0
+                FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：默认关闭自动更新，改为通过 GitHub Releases 发布新版本"))
+            End If
+            If LastVersion < 417 Then 'Release 2.15.1.0
+                FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：CurseForge 社区资源请求改为仅使用镜像源，减少连接等待"))
+                FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：关于页面补充原作者署名、赞助链接与源代码入口"))
+                FeatureList.Add(New KeyValuePair(Of Integer, String)(1, "优化：开源版说明不再提示 CurseForge API Key"))
+            End If
             If LastVersion < 411 Then 'Release 2.14.0.0
                 FeatureList.Add(New KeyValuePair(Of Integer, String)(5, "新增：允许修改、添加、移除、更新已安装版本的 MC 版本以及各个组件，可从版本设置中进入"))
                 FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：启动游戏时允许按 Esc 取消"))
@@ -100,6 +108,14 @@ Public Class FormMain
             '3：BUG+ IMP* FEAT-
             '2：BUG* IMP-
             '1：BUG-
+            If LastVersion < 416 Then 'Snapshot 2.15.0.0
+                FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：默认关闭自动更新，改为通过 GitHub Releases 发布新版本"))
+            End If
+            If LastVersion < 418 Then 'Snapshot 2.15.1.0
+                FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：CurseForge 社区资源请求改为仅使用镜像源，减少连接等待"))
+                FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：关于页面补充原作者署名、赞助链接与源代码入口"))
+                FeatureList.Add(New KeyValuePair(Of Integer, String)(1, "优化：开源版说明不再提示 CurseForge API Key"))
+            End If
             If LastVersion < 412 Then 'Snapshot 2.14.0.0
                 FeatureList.Add(New KeyValuePair(Of Integer, String)(5, "新增：允许修改、添加、移除、更新已安装版本的 MC 版本以及各个组件，可从版本设置中进入"))
                 FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：启动游戏时允许按 Esc 取消"))
@@ -443,7 +459,7 @@ Public Class FormMain
             Telemetry("启动")
             '开源版本提示
             If VersionBranchMain = "OpenSource" Then
-                MyMsgBox($"该版本中无法使用以下特性：{vbCrLf}- CurseForge API 调用：需要自行申请 API Key，然后添加到 ModSecret.vb 的开头{vbCrLf}- 正版登录：需要自行向微软申请 Client ID，然后添加到 ModSecret.vb 的开头{vbCrLf}- 更新与联网通知：避免滥用隐患{vbCrLf}- 主题切换：这是需要赞助解锁的纪念性质的功能，别让赞助者太伤心啦……{vbCrLf}- 百宝箱：开发早期往里面塞了些开发工具，整理起来太麻烦了……", "开源版本说明")
+                MyMsgBox($"该版本中无法使用以下特性：{vbCrLf}- 正版登录：需要自行向微软申请 Client ID，然后添加到 ModSecret.vb 的开头{vbCrLf}- 更新与联网通知：避免滥用隐患{vbCrLf}- 主题切换：这是需要赞助解锁的纪念性质的功能，别让赞助者太伤心啦……{vbCrLf}- 百宝箱：开发早期往里面塞了些开发工具，整理起来太麻烦了……", "开源版本说明")
             End If
         End Sub, "初始化", ThreadPriority.Lowest)
 
