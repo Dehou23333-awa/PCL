@@ -15,6 +15,13 @@ Public Class FormMain
         '3：BUG+ IMP* FEAT-
         '2：BUG* IMP-
         '1：BUG-
+        If LastVersion < 422 Then 'Release 2.16.0.0
+            FeatureList.Add(New KeyValuePair(Of Integer, String)(5, "新增：恢复联机功能，通过自行搭建的 EasyTier 节点与朋友组网，邀请码中会携带节点地址"))
+            FeatureList.Add(New KeyValuePair(Of Integer, String)(3, "优化：联机模块的下载与解压会显示在任务管理中，可查看进度并取消"))
+            FeatureList.Add(New KeyValuePair(Of Integer, String)(3, "优化：设置中新增联机节点说明与搭建指引"))
+            FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "修复：联机时无法解压联机模块"))
+            FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "修复：加入房间时邀请码中的节点地址会丢失第一个字符"))
+        End If
         If LastVersion < 421 Then 'Release 2.15.2.1
             FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：下载更新包时显示在任务管理中，可查看进度并取消"))
         End If
