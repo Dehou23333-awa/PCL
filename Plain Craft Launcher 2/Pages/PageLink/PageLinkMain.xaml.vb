@@ -171,7 +171,7 @@ Public Class PageLinkMain
         ServerPort = Code.Substring(1, 4).Upper.ConvertRadix(16, 10)
         NetworkName = Code.Substring(0, 11)
         NetworkSecret = Code.Substring(12, 5)
-        RoomPeers = ParsePeers(Code.Substring(21))
+        RoomPeers = ParsePeers(Code.Substring(20))
         Logger.Info($"尝试加入房间，网络名 {NetworkName}，网络密码 {NetworkSecret}，端口 {ServerPort}，节点 {RoomPeers.Join("，")}")
         '启动
         LastCode = Code
@@ -191,12 +191,12 @@ Public Class PageLinkMain
             End If
         End If
         '校验版本
-        If Code.Length < 23 OrElse Code(17) <> "-"c Then Return "邀请码格式有误，请让房主重新复制一份"
+        If Code.Length < 22 OrElse Code(17) <> "-"c Then Return "邀请码格式有误，请让房主重新复制一份"
         Dim CodeVersion As Integer = Val(Code.Substring(18, 2))
         If CodeVersion > INVITE_CODE_VERSION Then Return "你的 PCL 版本太老了，请在更新 PCL 之后再联机！"
         If CodeVersion < INVITE_CODE_VERSION Then Return "这是旧版 PCL 的邀请码，请让房主使用新版重新创建房间！"
         '校验节点
-        Dim CodePeers = ParsePeers(Code.Substring(21))
+        Dim CodePeers = ParsePeers(Code.Substring(20))
         If Not CodePeers.Any() Then Return "邀请码中没有包含联机节点，请让房主重新复制一份"
         Dim InvalidPeer = CodePeers.FirstOrDefault(Function(Address) Not ValidatePeer(Address))
         If InvalidPeer IsNot Nothing Then Return $"邀请码中的节点地址有误（{InvalidPeer}），可能被聊天软件截断，请让房主重新复制一份"
@@ -205,9 +205,9 @@ Public Class PageLinkMain
     Private Shared Function FixCodeFormat(Code As String) As String
         Code = Code.Between("【", "】").Between("[", "]") '从完整消息中提取
         Code = Code.Replace(vbCrLf, "").Replace(vbCr, "").Replace(vbLf, "").Replace(" ", "") '去掉聊天软件插入的换行与空白
-        '只对前 21 个字符做输入修正，节点地址中的大小写与内容必须原样保留
-        Dim Head As String = Code.Substring(0, Math.Min(21, Code.Length))
-        Return Head.ToUpper().Replace("O", "0").Replace("I", "1") & If(Code.Length > 21, Code.Substring(21), "")
+        '只对前 20 个字符做输入修正，节点地址中的大小写与内容必须原样保留
+        Dim Head As String = Code.Substring(0, Math.Min(20, Code.Length))
+        Return Head.ToUpper().Replace("O", "0").Replace("I", "1") & If(Code.Length > 20, Code.Substring(20), "")
     End Function
 
     '自动加入
@@ -462,6 +462,7 @@ Public Class PageLinkMain
             Split(New String() {",", "，"}, StringSplitOptions.RemoveEmptyEntries).
             Select(Function(Address) Address.Trim()).
             Where(Function(Address) Not String.IsNullOrEmpty(Address)).
+            Select(Function(Address) If(Address.Contains("://"), Address, "tcp://" & Address)).
             ToList()
     End Function
     ''' <summary>
@@ -478,8 +479,9 @@ Public Class PageLinkMain
     ''' </summary>
     Private Shared Function ValidatePeer(Address As String) As Boolean
         If String.IsNullOrWhiteSpace(Address) Then Return False
-        If Not (Address.StartsWithF("tcp://") OrElse Address.StartsWithF("udp://") OrElse
-                Address.StartsWithF("ws://") OrElse Address.StartsWithF("wss://")) Then Return False
+        Dim LowerAddress As String = Address.ToLower()
+        If Not (LowerAddress.StartsWithF("tcp://") OrElse LowerAddress.StartsWithF("udp://") OrElse
+                LowerAddress.StartsWithF("ws://") OrElse LowerAddress.StartsWithF("wss://")) Then Return False
         If Address.Contains(" ") Then Return False
         Dim PortValue As Integer
         Return Integer.TryParse(Address.Split(":"c).Last, PortValue) AndAlso PortValue > 0 AndAlso PortValue < 65536
