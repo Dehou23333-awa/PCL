@@ -445,6 +445,7 @@ Public Class FormMain
                 DlClientListMojangLoader.Start(1) 'PCL 会同时根据这里的加载结果决定是否使用官方源进行下载
                 RunCountSub()
                 ServerLoader.Start()
+                UpdateCheckOnStartup()
                 RunInNewThread(AddressOf TryClearTaskTemp, "TryClearTaskTemp", ThreadPriority.BelowNormal)
             Catch ex As Exception
                 Logger.Error(ex, "初始化加载池运行失败")

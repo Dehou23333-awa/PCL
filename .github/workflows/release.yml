@@ -31,6 +31,17 @@ jobs:
           describe=`git describe --tags --always`
           echo "describe=$describe" >> $GITHUB_ENV
 
+    - name: Set Version Code
+      shell: bash
+      run: |
+          # 从源码中提取正式版的手工递增 VersionCode，并写入资产名，供启动器检查更新时使用
+          code=`grep -m1 -oE 'VersionCode As Integer = [0-9]+' "Plain Craft Launcher 2/Modules/Base/ModBase.vb" | grep -oE '[0-9]+'`
+          if [ -z "$code" ]; then
+            echo "无法从 ModBase.vb 中提取 VersionCode"
+            exit 1
+          fi
+          echo "version_code=$code" >> $GITHUB_ENV
+
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v3
       with:
@@ -52,12 +63,12 @@ jobs:
       run: |
         New-Item -ItemType Directory out | Out-Null
         Copy-Item "Plain Craft Launcher 2\obj\Release\Plain Craft Launcher 2.exe" "out\Plain Craft Launcher 2.exe"
-        Compress-Archive -Path "out\*" -DestinationPath "PCL-${{ env.describe }}.zip"
+        Compress-Archive -Path "out\*" -DestinationPath "PCL-${{ env.describe }}-${{ env.version_code }}.zip"
 
     - name: Publish Release
       uses: softprops/action-gh-release@v2
       with:
         tag_name: ${{ inputs.tag || github.ref_name }}
-        name: ${{ inputs.tag || github.ref_name }}
-        files: PCL-${{ env.describe }}.zip
+        name: ${{ inputs.tag || github.ref_name }} (${{ env.version_code }})
+        files: PCL-${{ env.describe }}-${{ env.version_code }}.zip
         generate_release_notes: true
