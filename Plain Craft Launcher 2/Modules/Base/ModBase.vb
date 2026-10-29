@@ -892,6 +892,44 @@ Public Module ModBase
         Logger.Info($"启动进程：{StartInfo.FileName} {StartInfo.Arguments}")
         Return Process.Start(StartInfo)
     End Function
+    ''' <summary>
+    ''' 静默运行文件并返回输出流字符串。执行失败会抛出异常。
+    ''' </summary>
+    ''' <param name="FileName">文件名。可以为“notepad”等缩写。</param>
+    ''' <param name="Arguments">运行参数。</param>
+    ''' <param name="Timeout">等待该程序结束的最长时间（毫秒）。超时会直接结束进程。</param>
+    ''' <param name="WorkingDirectory">工作目录，同时会作为 appdata 环境变量传入。</param>
+    ''' <param name="Encoding">输出流使用的编码，为 Nothing 时使用系统默认值。</param>
+    ''' <param name="PrintLog">是否在日志中记录本次调用。</param>
+    Public Function StartProcessAndGetOutput(FileName As String, Optional Arguments As String = "", Optional Timeout As Integer = 1000000,
+        Optional WorkingDirectory As String = Nothing, Optional Encoding As Encoding = Nothing, Optional PrintLog As Boolean = True) As String
+        Dim Info = New ProcessStartInfo With {
+            .Arguments = Arguments,
+            .FileName = PathUtils.ToShortPath(FileName),
+            .UseShellExecute = False,
+            .CreateNoWindow = True,
+            .RedirectStandardError = True,
+            .RedirectStandardOutput = True,
+            .WorkingDirectory = PathUtils.ToShortPath(If(WorkingDirectory, Paths.Base.TrimEnd("\"c))),
+            .StandardErrorEncoding = Encoding,
+            .StandardOutputEncoding = Encoding
+        }
+        If WorkingDirectory IsNot Nothing Then
+            If Info.EnvironmentVariables.ContainsKey("appdata") Then
+                Info.EnvironmentVariables("appdata") = WorkingDirectory
+            Else
+                Info.EnvironmentVariables.Add("appdata", WorkingDirectory)
+            End If
+        End If
+        If PrintLog Then Logger.Info($"执行命令并等待返回结果：{FileName} {Arguments}")
+        Using Program As New Process With {.StartInfo = Info}
+            Program.Start()
+            Dim Result As String = Program.StandardOutput.ReadToEnd & Program.StandardError.ReadToEnd
+            Program.WaitForExit(Timeout)
+            If Not Program.HasExited Then Program.Kill()
+            Return Result
+        End Using
+    End Function
 
     ''' <summary>
     ''' 在新的工作线程中执行代码。

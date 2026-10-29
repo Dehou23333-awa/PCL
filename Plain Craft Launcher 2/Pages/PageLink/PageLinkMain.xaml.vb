@@ -409,6 +409,22 @@ Public Class PageLinkMain
     ''' </summary>
     Private DiscoverNodeID As Integer = -1
     ''' <summary>
+    ''' 本次房间中本机的节点名。
+    ''' 用于从节点列表中识别出自己，并作为 HostName 参数传给联机模块。
+    ''' </summary>
+    Private Shared HostName As String
+    ''' <summary>
+    ''' 与当前房间绑定的本机节点名，若尚未确定则立即生成。
+    ''' </summary>
+    Private Shared Function GetHostName(IsServer As Boolean) As String
+        Dim Result As String = ""
+        For i = 1 To 6
+            Result &= RandomInteger(0, 35).ConvertRadix(36)
+        Next
+        HostName = If(IsServer, "Server-", "Client-") & Result
+        Return HostName
+    End Function
+    ''' <summary>
     ''' 网络信息。
     ''' </summary>
     Private NetworkName As String, NetworkSecret As String
@@ -521,7 +537,7 @@ Public Class PageLinkMain
         '获取启动参数
         Dim Arguments As String = ServerConfig("Link")("Argument")
         Arguments += $" --network-name={NetworkName} --network-secret={NetworkSecret} --listeners {ListenersPort} --rpc-portal {RPCPort} --private-mode true"
-        Dim HostName = If(IsServerSide, "Server-", "Client-") & Identify.GetStableHashCode().ConvertRadix(36).TrimStart("-"c).EnsureLength("0", 6)
+        GetHostName(IsServerSide) '生成本次房间使用的节点名，后续直接引用 HostName 字段
         If IsServerSide Then
             Arguments += $" -i 10.114.114.114 --hostname={HostName} --tcp-whitelist={ServerPort} --udp-whitelist={ServerPort}"
         Else
@@ -853,21 +869,26 @@ ForcedPass:
         ''' </summary>
         Public Sub New(Info As JObject)
             '类别
-            Dim PeerName = Info("hostname").ToString
-            If Info("cost").ToString = "Local" Then
-                Type = Types.Self
+            Dim PeerName = If(Info("hostname")?.ToString, "")
+            Dim PeerCost = If(Info("cost")?.ToString, "")
+            If PeerName = HostName Then
+                Type = Types.Self '用本次房间专用的节点名识别自己
             ElseIf PeerName.StartsWithF("Client") Then
                 Type = Types.Client
-            ElseIf Info("ipv4") = "10.114.114.114" Then '只允许这个 IP 作为房主，避免网络被多个房主搞炸的情况
+            ElseIf Info("ipv4")?.ToString = "10.114.114.114" Then '只允许这个 IP 作为房主，避免网络被多个房主搞炸的情况
                 Type = Types.Server
             Else
                 Type = Types.Misc
             End If
             '基础信息
-            Double.TryParse(Info("lat_ms"), NumberStyles.Any, CultureInfo.InvariantCulture, Ping)
+            Double.TryParse(Info("lat_ms")?.ToString, NumberStyles.Any, CultureInfo.InvariantCulture, Ping)
             Name = PeerName
-            Relay = Info("cost").ToString.ContainsIgnoreCase("relay")
-            NATType = EnumUtils.FromString(Of NATTypes)(Info("nat_type"))
+            Relay = PeerCost.ContainsIgnoreCase("relay")
+            Try
+                NATType = EnumUtils.FromString(Of NATTypes)(Info("nat_type")?.ToString)
+            Catch
+                NATType = NATTypes.Pending '无法识别的类型只影响 NAT 提示，不影响连接
+            End Try
         End Sub
         Public Overrides Function ToString() As String
             Return $"{Type} - {Name} - Ping {Ping:0.0}ms [中继? {Relay}] - NAT {NATType}"
@@ -909,7 +930,7 @@ ForcedPass:
     Private RefreshPeerLoader As New LoaderTask(Of Integer, List(Of Peer))("EasyTier CLI", AddressOf RefreshPeer)
     Private Sub RefreshPeer()
         Try
-            Dim CliResult = "" 'StartProcessAndGetOutput(PathEasyTier & "联机模块 CLI.exe", $"-o json -p 127.0.0.1:{RPCPort} peer", 2000, Encoding:=Encoding.UTF8, PrintLog:=False)
+            Dim CliResult = StartProcessAndGetOutput(PathEasyTier & "联机模块 CLI.exe", $"-o json -p 127.0.0.1:{RPCPort} peer", 2000, Encoding:=Encoding.UTF8, PrintLog:=False)
             '解析
             If Not CliResult.Contains("lat_ms") Then Throw New Exception("CLI 调用失败：" & vbCrLf & CliResult)
             If GetUuid() Mod If(ModeDebug, 23, 103) = 0 Then Logger.Info($"CLI 输出抽样：{vbCrLf}{CliResult}")
