@@ -89,7 +89,7 @@
                         <TextBlock Grid.Column="3" Grid.ColumnSpan="3" Grid.Row="1"
                             Text="创建房间" FontSize="20" Foreground="{DynamicResource ColorBrush3}" />
                         <TextBlock Grid.Column="3" Grid.ColumnSpan="3" Grid.Row="2" Margin="1,10,30,10" 
-                            Text="邀请朋友加入你的单人游戏。"
+                            Text="邀请朋友加入你的单人游戏。需要先在设置中填写联机节点。"
                             FontSize="15" LineHeight="19" MaxWidth="400" TextWrapping="Wrap" Foreground="{StaticResource ColorBrushGray3}" />
                     </Grid>
                 </local:MyCard>
