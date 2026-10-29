@@ -11,6 +11,10 @@ Public Class FormMain
         Dim FeatureList As New List(Of KeyValuePair(Of Integer, String))
         '统计更新日志条目
         If BuildType = BuildTypes.Release Then
+            If LastVersion < 419 Then 'Release 2.15.2.0
+                FeatureList.Add(New KeyValuePair(Of Integer, String)(4, "新增：从 GitHub Releases 检查并下载启动器更新，重启后自动完成替换"))
+                FeatureList.Add(New KeyValuePair(Of Integer, String)(3, "优化：移除匿名遥测数据上报与启动器公告"))
+            End If
             If LastVersion < 415 Then 'Release 2.15.0.0
                 FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：默认关闭自动更新，改为通过 GitHub Releases 发布新版本"))
             End If
@@ -108,6 +112,10 @@ Public Class FormMain
             '3：BUG+ IMP* FEAT-
             '2：BUG* IMP-
             '1：BUG-
+            If LastVersion < 420 Then 'Snapshot 2.15.2.0
+                FeatureList.Add(New KeyValuePair(Of Integer, String)(4, "新增：从 GitHub Releases 检查并下载启动器更新，重启后自动完成替换"))
+                FeatureList.Add(New KeyValuePair(Of Integer, String)(3, "优化：移除匿名遥测数据上报与启动器公告"))
+            End If
             If LastVersion < 416 Then 'Snapshot 2.15.0.0
                 FeatureList.Add(New KeyValuePair(Of Integer, String)(2, "优化：默认关闭自动更新，改为通过 GitHub Releases 发布新版本"))
             End If
