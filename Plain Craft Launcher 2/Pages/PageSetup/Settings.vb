@@ -36,8 +36,6 @@ Public Class Settings
         New Setting("SystemDebugSkipCopy", False, Source:=Sources.Registry),
         New Setting("SystemSystemCache", "", Source:=Sources.Registry),
         New Setting("SystemSystemUpdate", 3), '默认"关闭更新提示"（禁用自动更新）
-        New Setting("SystemSystemActivity", 0),
-        New Setting("SystemSystemTelemetry", True, Source:=Sources.Registry),
         New Setting("CacheDrops", "", Source:=Sources.Registry),
         New Setting("CacheConfig", 0, Source:=Sources.Registry),
         New Setting("CacheExportConfig", "", Source:=Sources.Registry),
