@@ -41,6 +41,8 @@
                     </Grid>
                     <TextBlock Margin="0,12,0,0" FontSize="13" LineHeight="19" TextWrapping="Wrap" Foreground="{StaticResource ColorBrushGray3}"
                         Text="联机通过 EasyTier 将远程玩家组成一个虚拟局域网，因此必须有一个双方都能连到的节点。节点由使用者自行搭建，PCL 不提供公共节点；没有填写节点时无法创建房间。" />
+                    <TextBlock Margin="0,8,0,0" FontSize="13" LineHeight="19" TextWrapping="Wrap" Foreground="{StaticResource ColorBrushGray3}"
+                        Text="如果网络无法下载联机模块，可以把别人电脑上 PCL 数据文件夹内 EasyTier 文件夹中的文件直接复制到同一位置，PCL 会跳过下载并直接使用。" />
                     <local:MyButton MinWidth="140" Padding="13,5" Margin="0,12,0,0" HorizontalAlignment="Left"
                         Text="如何搭建节点"
                         local:CustomEventService.EventType="打开网页" local:CustomEventService.EventData="https://easytier.cn" />
