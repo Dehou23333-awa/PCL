@@ -530,6 +530,7 @@ Public Class PageLinkMain
         If Not (FileUtils.Exists(PathEasyTier & "联机模块 CLI.exe") AndAlso FileUtils.Exists(PathEasyTier & "联机模块.exe") AndAlso
                 FileUtils.Exists(PathEasyTier & "Packet.dll")) Then
             Settings.Set("LinkEasyTierVersion", -1)
+            FileUtils.Delete(PathEasyTier & "EasyTier.zip") '没有安装好的模块时，残留的压缩包可能已损坏，直接重新下载
         End If
         Dim LocalVersion As Integer = Settings.Get(Of Integer)("LinkEasyTierVersion")
         ServerVersion = LinkModuleVersion
@@ -551,12 +552,24 @@ Public Class PageLinkMain
         '解压文件
         UpdateLoadingPage("正在解压联机模块……", "解压联机模块")
         If FileUtils.Exists(PathEasyTier & "EasyTier.zip") Then
-            '解压
+            '解压到临时文件夹
             Dim ExtractPath As String = RequestTaskTempFolder()
-            'FileUtils.ExtractToDirectory(PathEasyTier & "EasyTier.zip", ExtractPath,
-            '    progressHandler:=Sub(Percentage) Task.Progress = Percentage * 0.05)
-            DirectoryUtils.Copy(DirectoryUtils.EnumerateDirectories(ExtractPath, True).First, PathEasyTier)
+            FileUtils.ExtractToDirectory(PathEasyTier & "EasyTier.zip", ExtractPath,
+                Task.CreateCancellationToken(), Task.CreateSyncProgressProvider(ToPercentage:=0.05))
+            '压缩包默认会套一层文件夹，也可能直接放在根目录
+            Dim SourceFolder As String = DirectoryUtils.EnumerateDirectories(ExtractPath, True).FirstOrDefault()
+            If SourceFolder Is Nothing Then SourceFolder = ExtractPath
+            DirectoryUtils.Copy(SourceFolder, PathEasyTier)
+            '检查解压结果
+            If Not (FileUtils.Exists(PathEasyTier & "easytier-core.exe") AndAlso FileUtils.Exists(PathEasyTier & "easytier-cli.exe")) Then
+                Logger.Warn($"联机模块压缩包中缺少必要的文件：{ExtractPath}")
+                FileUtils.Delete(PathEasyTier & "EasyTier.zip")
+                Settings.Set("LinkEasyTierVersion", -1)
+                Throw New Exception("$联机模块压缩包中缺少必要的文件，请重新联机以自动重新下载")
+            End If
             '重命名
+            FileUtils.Delete(PathEasyTier & "联机模块.exe")
+            FileUtils.Delete(PathEasyTier & "联机模块 CLI.exe")
             FileUtils.Move(PathEasyTier & "easytier-core.exe", PathEasyTier & "联机模块.exe")
             FileUtils.Move(PathEasyTier & "easytier-cli.exe", PathEasyTier & "联机模块 CLI.exe")
             '清理
