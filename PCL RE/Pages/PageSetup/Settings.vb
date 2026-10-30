@@ -252,7 +252,7 @@ Public Class Settings
             If Encrypted Then
                 Try
                     If Value Is Nothing Then Value = ""
-                    Value = DesEncrypt(Value, "PCL" & Identify)
+                    Value = EncryptSetting(Value)
                 Catch ex As Exception
                     Logger.Warn(ex, $"加密设置失败：{Key}")
                 End Try
@@ -316,31 +316,32 @@ Public Class Settings
         '正常读取
         Try
             Dim GotValue As String = Nothing '先用 String 储存，避免类型转换
-            Dim DefaultValue As String = If(Entry.Encrypted, DesEncrypt(Entry.DefaultValue, "PCL" & Identify), Entry.DefaultValue)
             Select Case Entry.Source
                 Case Sources.Normal
-                    GotValue = ReadIni("Setup", Key, DefaultValue)
+                    GotValue = ReadIni("Setup", Key, "")
                 Case Sources.Registry
-                    GotValue = RegistryUtils.TryRead($"HKEY_CURRENT_USER\Software\{RegFolder}", Key, DefaultValue)
+                    GotValue = RegistryUtils.TryRead($"HKEY_CURRENT_USER\Software\{RegFolder}", Key, "")
                 Case Sources.Instance
                     If Instance Is Nothing Then
                         Throw New Exception($"读取版本设置 {Key} 时未提供目标版本")
                     Else
-                        GotValue = ReadIni(Instance.PathVersion & "PCLRE\Setup.ini", Key, DefaultValue)
+                        GotValue = ReadIni(Instance.PathVersion & "PCLRE\Setup.ini", Key, "")
                     End If
             End Select
             If Entry.Encrypted Then
-                If GotValue = DefaultValue Then
+                If String.IsNullOrEmpty(GotValue) Then
                     GotValue = Entry.DefaultValue
                 Else
-                    Try
-                        GotValue = DesDecrypt(GotValue, "PCL" & Identify)
-                    Catch ex As Exception
-                        Logger.Warn(ex, $"解密设置失败：{Key}")
+                    Dim Decrypted As String = DecryptSetting(GotValue, "PCL" & Identify)
+                    If Decrypted Is Nothing Then
+                        '换 Windows 用户、换机器或数据损坏时会解密失败，此时重置为默认值并重新保存
+                        Logger.Warn($"解密设置失败，已重置为默认值：{Key}")
                         GotValue = Entry.DefaultValue
                         Entry.Set(Entry.DefaultValue, Instance)
                         Entry.Save(Instance)
-                    End Try
+                    Else
+                        GotValue = Decrypted
+                    End If
                 End If
             End If
             Entry.Set(CTypeDynamic(GotValue, Entry.Type), Instance)
@@ -424,32 +425,49 @@ Public Class Settings
         End Select
     End Function
 
-#Region "DES 加密"
+#Region "设置加密"
 
+    'DPAPI 数据前缀，用于区分旧版 DES 数据，便于旧值自动迁移
+    Private Const DpapiPrefix As String = "dpapi:"
+    '旧版 DES 初始向量，仅用于读取历史数据
     Private Shared ReadOnly desInitialVector As Byte() = Encoding.UTF8.GetBytes("95168702")
 
     ''' <summary>
-    ''' 使用 DES 对称加密算法加密字符串。
+    ''' 使用 Windows DPAPI（当前用户作用域）加密设置值。
     ''' </summary>
-    Private Shared Function DesEncrypt(sourceString As String, Optional key As String = Nothing) As String
-        key = If(key Is Nothing, "@;$ Abv2", key.GetStableHashCode().ToString().EnsureLength("X"c, 8).Substring(0, 8))
-        Dim btKey As Byte() = Encoding.UTF8.GetBytes(key)
-        Using des As New DESCryptoServiceProvider()
-            Using ms As New MemoryStream()
-                Using cs As New CryptoStream(ms, des.CreateEncryptor(btKey, desInitialVector), CryptoStreamMode.Write)
-                    Dim inData As Byte() = Encoding.UTF8.GetBytes(sourceString)
-                    cs.Write(inData, 0, inData.Length)
-                    cs.FlushFinalBlock()
-                    Return Convert.ToBase64String(ms.ToArray())
-                End Using
-            End Using
-        End Using
+    Private Shared Function EncryptSetting(sourceString As String) As String
+        If String.IsNullOrEmpty(sourceString) Then Return ""
+        Dim raw As Byte() = Encoding.UTF8.GetBytes(sourceString)
+        Return DpapiPrefix & Convert.ToBase64String(ProtectedData.Protect(raw, Nothing, DataProtectionScope.CurrentUser))
     End Function
 
     ''' <summary>
-    ''' 使用 DES 对称加密算法解密字符串。
+    ''' 解密设置值。解密失败时返回 Nothing，调用方据此重置为默认值。
     ''' </summary>
-    Private Shared Function DesDecrypt(encryptedString As String, Optional key As String = Nothing) As String
+    Private Shared Function DecryptSetting(encryptedString As String, Optional legacyKey As String = Nothing) As String
+        If String.IsNullOrEmpty(encryptedString) Then Return ""
+        If encryptedString.StartsWith(DpapiPrefix, StringComparison.Ordinal) Then
+            Try
+                Dim raw As Byte() = Convert.FromBase64String(encryptedString.Substring(DpapiPrefix.Length))
+                Return Encoding.UTF8.GetString(ProtectedData.Unprotect(raw, Nothing, DataProtectionScope.CurrentUser))
+            Catch ex As Exception
+                Logger.Warn(ex, "DPAPI 解密失败")
+                Return Nothing
+            End Try
+        End If
+        '旧版 DES 数据：成功读出后，下次保存会自动改写为 DPAPI 格式
+        Try
+            Return DesDecryptLegacy(encryptedString, legacyKey)
+        Catch ex As Exception
+            Logger.Warn(ex, "旧版 DES 解密失败")
+            Return Nothing
+        End Try
+    End Function
+
+    ''' <summary>
+    ''' 旧版 DES 解密，仅用于迁移历史数据。
+    ''' </summary>
+    Private Shared Function DesDecryptLegacy(encryptedString As String, Optional key As String = Nothing) As String
         key = If(key Is Nothing, "@;$ Abv2", key.GetStableHashCode().ToString().EnsureLength("X"c, 8).Substring(0, 8))
         Dim btKey As Byte() = Encoding.UTF8.GetBytes(key)
         Using des As New DESCryptoServiceProvider()
