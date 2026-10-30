@@ -35,7 +35,7 @@ jobs:
       shell: bash
       run: |
           # 从源码中提取正式版的手工递增 VersionCode，并写入资产名，供启动器检查更新时使用
-          code=`grep -m1 -oE 'VersionCode As Integer = [0-9]+' "Plain Craft Launcher 2/Modules/Base/ModBase.vb" | grep -oE '[0-9]+'`
+          code=`grep -m1 -oE 'VersionCode As Integer = [0-9]+' "PCL RE/Modules/Base/ModBase.vb" | grep -oE '[0-9]+'`
           if [ -z "$code" ]; then
             echo "无法从 ModBase.vb 中提取 VersionCode"
             exit 1
@@ -49,26 +49,26 @@ jobs:
 
     - name: Replace
       run: |
-        (gc "Plain Craft Launcher 2\Modules\ModSecret.vb") -replace 'Public OAuthClientId As String = If(Environment.GetEnvironmentVariable("PCL_MS_CLIENT_ID"), "")', 'Public OAuthClientId As String = If(Environment.GetEnvironmentVariable("PCL_MS_CLIENT_ID"), "${{ secrets.CLIENT_ID }}")' | Out-File "Plain Craft Launcher 2\Modules\ModSecret.vb"
-        (gc "Plain Craft Launcher 2\Modules\ModSecret.vb") -replace 'Public CurseForgeAPIKey As String = If(Environment.GetEnvironmentVariable("PCL_CURSEFORGE_API_KEY"), "")', 'Public CurseForgeAPIKey As String = If(Environment.GetEnvironmentVariable("PCL_CURSEFORGE_API_KEY"), "${{ secrets.CURSEFORGE_API_KEY }}")' | Out-File "Plain Craft Launcher 2\Modules\ModSecret.vb"
-        (gc "Plain Craft Launcher 2\Modules\Base\ModBase.vb") -replace 'Public Const CommitHash As String = ""', 'Public Const CommitHash As String = "${{ github.sha }}"' | Out-File "Plain Craft Launcher 2\Modules\Base\ModBase.vb"
+        (gc "PCL RE\Modules\ModSecret.vb") -replace 'Public OAuthClientId As String = If(Environment.GetEnvironmentVariable("PCL_MS_CLIENT_ID"), "")', 'Public OAuthClientId As String = If(Environment.GetEnvironmentVariable("PCL_MS_CLIENT_ID"), "${{ secrets.CLIENT_ID }}")' | Out-File "PCL RE\Modules\ModSecret.vb"
+        (gc "PCL RE\Modules\ModSecret.vb") -replace 'Public CurseForgeAPIKey As String = If(Environment.GetEnvironmentVariable("PCL_CURSEFORGE_API_KEY"), "")', 'Public CurseForgeAPIKey As String = If(Environment.GetEnvironmentVariable("PCL_CURSEFORGE_API_KEY"), "${{ secrets.CURSEFORGE_API_KEY }}")' | Out-File "PCL RE\Modules\ModSecret.vb"
+        (gc "PCL RE\Modules\Base\ModBase.vb") -replace 'Public Const CommitHash As String = ""', 'Public Const CommitHash As String = "${{ github.sha }}"' | Out-File "PCL RE\Modules\Base\ModBase.vb"
 
     - name: Restore NuGet Packages
       run: dotnet restore PCLCS\PCLCS.csproj
 
     - name: Build
-      run: msbuild "Plain Craft Launcher 2\Plain Craft Launcher 2.vbproj" -p:Configuration=Release
+      run: msbuild "PCL RE\PCL RE.vbproj" -p:Configuration=Release
 
     - name: Package
       run: |
         New-Item -ItemType Directory out | Out-Null
-        Copy-Item "Plain Craft Launcher 2\obj\Release\Plain Craft Launcher 2.exe" "out\Plain Craft Launcher 2.exe"
-        Compress-Archive -Path "out\*" -DestinationPath "PCL-${{ env.describe }}-${{ env.version_code }}.zip"
+        Copy-Item "PCL RE\obj\Release\PCL RE.exe" "out\PCL RE.exe"
+        Compress-Archive -Path "out\*" -DestinationPath "PCL-RE-${{ env.describe }}-${{ env.version_code }}.zip"
 
     - name: Publish Release
       uses: softprops/action-gh-release@v2
       with:
         tag_name: ${{ inputs.tag || github.ref_name }}
         name: ${{ inputs.tag || github.ref_name }} (${{ env.version_code }})
-        files: PCL-${{ env.describe }}-${{ env.version_code }}.zip
+        files: PCL-RE-${{ env.describe }}-${{ env.version_code }}.zip
         generate_release_notes: true
